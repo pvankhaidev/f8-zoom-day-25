@@ -8,8 +8,13 @@ tabItems.forEach((tabItem) => {
     const thisTabItems = Array.from(tabList.querySelectorAll(".tab-item"));
     const thisTabContents = tab.querySelectorAll(".tab-content");
     const index = thisTabItems.indexOf(tabItem);
+    let oldItemText = "";
+    let oldContentText = "";
 
     thisTabItems.forEach((item) => {
+      // dispatchEvent
+      if (item.classList.contains("active")) oldItemText = item.textContent;
+      //
       if (item === tabItem) {
         item.classList.add("active");
       } else {
@@ -18,13 +23,33 @@ tabItems.forEach((tabItem) => {
     });
 
     thisTabContents.forEach((tab, tabIndex) => {
+      // dispatchEvent
+      if (tab.classList.contains("active")) oldContentText = tab.textContent;
+      //
       if (tabIndex === index) {
         tab.classList.add("active");
       } else {
         tab.classList.remove("active");
       }
     });
+
+    // dispatchEvent
+    document.dispatchEvent(
+      new CustomEvent("clickTab", {
+        detail: {
+          item: oldItemText,
+          tabContent: oldContentText,
+        },
+      })
+    );
   });
+});
+
+// dispatchEvent
+document.addEventListener("clickTab", function (event) {
+  console.log(
+    `Old Item: ${event.detail.item}\nOld content: ${event.detail.tabContent}`
+  );
 });
 
 document.addEventListener("keydown", function (event) {
