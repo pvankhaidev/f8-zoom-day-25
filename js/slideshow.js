@@ -6,7 +6,7 @@ const paginationDots = $$(".pagination-dot");
 const prevBtns = $$(".prev");
 const nextBtns = $$(".next");
 const slideTransitionTime = 0.3;
-const autoPlayTimeInterval = 3000;
+const autoPlayTimeInterval = 300000;
 
 document.addEventListener("DOMContentLoaded", () => {
   const slideshows = document.querySelectorAll(".slideshow");
@@ -37,14 +37,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
 prevBtns.forEach((prevBtn) => {
   prevBtn.addEventListener("click", function () {
-    handleSlideShow(this);
+    const slideShow = this.closest(".slideshow");
+    const track = slideShow.querySelector(".slideshow-track");
+
+    const { old, current } = handleSlideShow(this);
+
+    function fireChangeEvent() {
+      track.removeEventListener("transitionend", fireChangeEvent);
+      const slideChange = new CustomEvent("slideshow:change", {
+        detail: { old, current },
+      });
+      document.dispatchEvent(slideChange);
+    }
+
+    track.addEventListener("transitionend", fireChangeEvent);
   });
 });
 
 nextBtns.forEach((nextBtn) => {
   nextBtn.addEventListener("click", function () {
-    handleSlideShow(this);
+    const slideShow = this.closest(".slideshow");
+    const track = slideShow.querySelector(".slideshow-track");
+
+    const { old, current } = handleSlideShow(this);
+
+    function slideChangeEvent() {
+      track.removeEventListener("transitionend", slideChangeEvent);
+      const slideChange = new CustomEvent("slideshow:change", {
+        detail: { track: track, old, current },
+      });
+      document.dispatchEvent(slideChange);
+    }
+
+    track.addEventListener("transitionend", slideChangeEvent);
   });
+});
+
+document.addEventListener("slideshow:change", (event) => {
+  console.log("Track:", event.detail.track);
+  console.log("Old slide:", event.detail.old);
+  console.log("Current slide:", event.detail.current);
 });
 
 function handleSlideShow(btn) {
@@ -113,6 +145,7 @@ function handleSlideShow(btn) {
         { once: true }
       );
     }
+    return { old: slideItems[index], current: slideItems[nextIndex] };
   } else if (btnType === "prev") {
     paginationDots[prevIndex].classList.add("active");
     track.dataset.animating = "true";
@@ -161,6 +194,7 @@ function handleSlideShow(btn) {
         { once: true }
       );
     }
+    return { old: slideItems[index], current: slideItems[prevIndex] };
   }
 }
 
