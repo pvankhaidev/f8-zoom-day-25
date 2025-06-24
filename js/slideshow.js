@@ -6,6 +6,7 @@ const paginationDots = $$(".pagination-dot");
 const prevBtns = $$(".prev");
 const nextBtns = $$(".next");
 const slideTransitionTime = 0.3;
+const autoPlayTimeInterval = 3000;
 
 document.addEventListener("DOMContentLoaded", () => {
   const slideshows = document.querySelectorAll(".slideshow");
@@ -162,3 +163,25 @@ function handleSlideShow(btn) {
     }
   }
 }
+
+// auto play
+setInterval(() => {
+  $$(".slideshow").forEach((slideshow) => {
+    if (slideshow.dataset.autoplay === "true") {
+      const nextBtn = slideshow.querySelector(".next");
+      if (nextBtn) nextBtn.dispatchEvent(new Event("click"));
+    }
+  });
+}, autoPlayTimeInterval);
+
+$$(".slideshow").forEach((slideshow) => {
+  slideshow.dataset.autoplay = "true";
+
+  slideshow.addEventListener("mouseenter", () => {
+    slideshow.dataset.autoplay = "false";
+  });
+
+  slideshow.addEventListener("mouseleave", () => {
+    slideshow.dataset.autoplay = "true";
+  });
+});
